@@ -1,0 +1,1 @@
+kill -9 $(ps | grep python | cut -d ' ' -f1)

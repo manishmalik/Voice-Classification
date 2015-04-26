@@ -14,6 +14,13 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
+#Voice Samples
+*.wav
+*.wave
+
+#pythone byte code
+*.pyc
+
 # Windows shortcuts
 *.lnk
 
