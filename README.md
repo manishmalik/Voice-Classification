@@ -1,6 +1,14 @@
 # Voice-Classification
 Gender Classification of voice
 
+Pre-requisite :
+
+1.Aubio
+	apt-get install aubio-tools libaubio-dev libaubio-doc
+
+2.sklearn (scikit-learn)
+	pip install -U scikit-learn or apt-get install python-sklearn
+
 To run the program :
 
 1. Run server . 
