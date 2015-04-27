@@ -102,12 +102,12 @@ def pitchpy():
 	avg=avg/(len(extracted_voice))
 	print "Average Pitch of Extracted Voice: "+ str(avg)
 
-        formantf = get_formants(filename)
+    formantf = get_formants(filename)
 
-        for i in formantf:
-            if i != 0:
-                formantf = i
-                break
+    for i in formantf:
+    	if i != 0:
+    		formantf = i
+		    break
 
 	ageclassify(avg, VocalTractLength(formantf))
 	clf.classify([avg])

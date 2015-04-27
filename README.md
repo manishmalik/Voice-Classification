@@ -9,6 +9,8 @@ Pre-requisite :
 2.sklearn (scikit-learn)
 	pip install -U scikit-learn or apt-get install python-sklearn
 
+3.scikit.talkbox
+	sudo easy_install scikits.talkbox
 To run the program :
 
 1. Run server . 

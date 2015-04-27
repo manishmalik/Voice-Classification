@@ -103,13 +103,13 @@ class ClientThread(threading.Thread):
 			f.write(data)
 			count = count+1
 		f.close()
-		gender=audio_analysis(file_name)
-		print gender
-		tkMessageBox.showinfo("Speaker Gender","Gender of the Speaker Must be : %s"%gender)
+		output= audio_analysis(file_name)
+		print output
+		tkMessageBox.showinfo("Speaker's Prediction'","%s"%output)
 		# Responding to the client
 		for con in connections:
 			try:
-				con.sendall('%%mssg%%'+gender)
+				con.sendall('%%mssg%%'+output)
 			except:
 				pass
 

@@ -2,9 +2,22 @@
 import sys
 from aubio import source, pitch, freqtomidi
 import classifier_pitch
-from classifier_pitch import clf
+from classifier_pitch import clf, pavg, vtlavg, VocalTractLength
 import subprocess
+from formant import get_formants
 
+def ageclassify(pitch, vtl):
+    output=""
+    if pitch > pavg and vtl < vtlavg:
+        output= "The speaker is below 18 years of age."
+    elif pitch < pavg and vtl > vtlavg:
+        output= "The speaker is an adult male"
+    elif pitch > pavg and vtl > vtlavg:
+        output= "The speaker is an adult female."
+    elif pitch < pavg and vtl < vtlavg:
+        output= "The speaker most likely suffers from dwarfism and is an adult."
+        
+    return output
 
 def audio_analysis (filename):
     
@@ -78,7 +91,20 @@ def audio_analysis (filename):
     avg=avg/(len(extracted_voice))
     print "Average Pitch of Extracted Voice: "+ str(avg)
     
+    formantf = get_formants(filename)
+
+    for i in formantf:
+        if i != 0:
+            formantf = i
+            break
+    output_final=""
+
     gender=clf.classify([avg])
+
+    output_final="Predicted Gender : "+gender+"\n"
+
+    age_predict=ageclassify(avg, VocalTractLength(formantf))
+    output_final=output_final+"And "+age_predict
 
     # print "Gender : "+gender
     #print pitches
@@ -140,4 +166,4 @@ def audio_analysis (filename):
     # set_xlabels_sample2time(ax3, times[-1], samplerate)
     # plt.show()
     # #plt.savefig(os.path.basename(filename) + '.svg')
-    return gender
+    return output_final

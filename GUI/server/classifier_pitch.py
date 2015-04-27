@@ -7,8 +7,39 @@ import numpy
 import subprocess
 import classifier
 from classifier import Classifier
+from formant import get_formants
 
+#folder where we store all the training data
 foldername = "samples"
+
+# A function with no learning algorithms in it, calculates the average over all pitch and vocal tract length.
+# Male above 18 years.
+# Male below 18 years.
+# Female above 18 years.
+# Female below 18 years.
+def ageBenchmarks(pitch, vtl):
+    avgp = 0
+    avgtl = 0
+
+    for i in pitch:
+        avgp += i[0]
+
+    for i in vtl:
+        avgtl += i.item()
+
+    return avgp / len(pitch), avgtl / len(vtl)
+
+
+# A function to calculate the vocal tract length of the speaker
+#    VTL = c / 4F
+def VocalTractLength(formant):
+    return (3 * (10**8)) / (4 * formant)
+
+# A list to store all the vocal tract lengths
+vtl = []
+
+# A list to store all formant frequencies.
+formant = []
 
 # Size with which to instantiate numpy array
 num_samples = len([name for name in os.listdir(foldername) if os.path.isfile(os.path.join(foldername,name))])
@@ -67,14 +98,14 @@ for fname in os.listdir(foldername):
     out = sub.communicate()[0]
 
     # Importing Regular Expression Modules for extracting the output[timestamp] of Aubiocut
-    
+
     timestamps=re.findall("\d+.\d+\d+\d+\d+", out)
     #print timestamps
 
     extracted_voice=[]
 
     for i in timestamps:
-    	i=float(i)	
+    	i=float(i)
     	for j in range(len(time_stamp)):
             #Using the floor functions the timestamp is extracted when speakers spoke a word.
     		temp1=math.floor(i*10)/10
@@ -85,18 +116,27 @@ for fname in os.listdir(foldername):
     			#print "True"+str(j)+pitches[j]
     			extracted_voice+=[pitches[j]]
 
-    #print extracted_voice	
+    formantfr = get_formants(filename)
+
+    for i in formantfr:
+
+        if i != 0:
+# Add the first non-zero frequency to our list of formant frequencies.
+            formant.append(i)
+            break
+
+    vtl.append(VocalTractLength(formant[len(formant)-1]))
+
     avg=0.0
     for i in extracted_voice:
     	avg+=i
     avg=avg/(len(extracted_voice))
-#    print "Average Pitch of Extracted Voice: "+ str(avg)
 
     # Store the average pitch in our array
     trainingpitch[current] = [avg]
 
     samplelist.append(fname)
-    
+
     labels = fname.split('.')[0].split(' ')
 
     if labels[2] == 'MALE':
@@ -106,5 +146,8 @@ for fname in os.listdir(foldername):
 
     current = current + 1
 
-global clf 
+global clf
 clf = Classifier(trainingpitch, targets, samplelist)
+
+global pavg, vtlavg
+pavg, vtlavg = ageBenchmarks(trainingpitch.tolist(), vtl)
