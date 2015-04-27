@@ -8,7 +8,34 @@ import subprocess
 import classifier
 from classifier import Classifier
 
+#folder where we store all the training data
 foldername = "samples"
+
+# A function with no learning algorithms in it, calculates the average over all pitch and vocal tract length.
+# Male above 18 years.
+# Male below 18 years.
+# Female above 18 years.
+# Female below 18 years.
+def ageBenchmarks(pitch, vtl):
+    avgp = 0
+    avgtl = 0
+
+    for i in pitch:
+        avgp += i[0]
+
+    for i in vtl:
+        avgtl += i.item()
+
+    return avgp / len(pitch), avgtl / len(vtl)
+
+
+# A function to calculate the vocal tract length of the speaker
+#    VTL = c / 4F
+def VocalTractLength(formant):
+    return (3 * (10**8)) / (4 * formant)
+
+# A list to store all the vocal tract lengths
+vtl = []
 
 # Size with which to instantiate numpy array
 num_samples = len([name for name in os.listdir(foldername) if os.path.isfile(os.path.join(foldername,name))])
@@ -67,14 +94,14 @@ for fname in os.listdir(foldername):
     out = sub.communicate()[0]
 
     # Importing Regular Expression Modules for extracting the output[timestamp] of Aubiocut
-    
+
     timestamps=re.findall("\d+.\d+\d+\d+\d+", out)
     #print timestamps
 
     extracted_voice=[]
 
     for i in timestamps:
-    	i=float(i)	
+    	i=float(i)
     	for j in range(len(time_stamp)):
             #Using the floor functions the timestamp is extracted when speakers spoke a word.
     		temp1=math.floor(i*10)/10
@@ -85,7 +112,10 @@ for fname in os.listdir(foldername):
     			#print "True"+str(j)+pitches[j]
     			extracted_voice+=[pitches[j]]
 
-    #print extracted_voice	
+    #print extracted_voice
+
+    vtl.append(VocalTractLength(extracted_voice[0]))
+
     avg=0.0
     for i in extracted_voice:
     	avg+=i
@@ -96,7 +126,7 @@ for fname in os.listdir(foldername):
     trainingpitch[current] = [avg]
 
     samplelist.append(fname)
-    
+
     labels = fname.split('.')[0].split(' ')
 
     if labels[2] == 'MALE':
@@ -106,5 +136,8 @@ for fname in os.listdir(foldername):
 
     current = current + 1
 
-global clf 
+global clf
 clf = Classifier(trainingpitch, targets, samplelist)
+
+global pavg, vtlavg
+pavg, vtlavg = ageBenchmarks(trainingpitch.tolist(), vtl)

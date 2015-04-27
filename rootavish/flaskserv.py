@@ -5,15 +5,25 @@ import base64, re
 import sys
 from aubio import source,freqtomidi
 from aubio import pitch as p1
-from classifier_pitch import clf
+from classifier_pitch import clf, pavg, vtlavg, VocalTractLength
 import subprocess
 from numpy import array, ma
 import matplotlib.pyplot as plt
 from demo_waveform_plot import get_waveform_plot, set_xlabels_sample2time
 
-#from classifier_pitch import clf
-
 app = Flask(__name__)
+
+# Function to place speaker into an age group.
+def ageclassify(pitch, vtl):
+
+	if pitch > pavg and vtl < vtlavg:
+		print "The speaker is below 18 years of age."
+	elif pitch < pavg and vtl > vtlavg:
+		print "The speaker is an adult male"
+	elif pitch > pavg and vtl > vtlavg:
+		print "The speaker is an adult female."
+	elif pitch < pavg and vtl < vtlavg:
+		print "The speaker most likely suffers from dwarfism and is an adult."
 
 @app.route('/classify/', methods=['POST'])
 def pitchpy():
@@ -90,6 +100,8 @@ def pitchpy():
 		avg+=i
 	avg=avg/(len(extracted_voice))
 	print "Average Pitch of Extracted Voice: "+ str(avg)
+
+	ageclassify(avg, VocalTractLength(extracted_voice[0]))
 	clf.classify([avg])
 	skip = 1
 
@@ -149,4 +161,4 @@ def pitchpy():
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run(debug=True, host='0.0.0.0')
