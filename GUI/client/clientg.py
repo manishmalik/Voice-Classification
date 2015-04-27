@@ -30,7 +30,8 @@ class ClientThread(threading.Thread):
 			mssg = self.app.cl_socket.recv(512)
 			if '%%mssg%%' in mssg:
 				mssg = mssg.split('%%mssg%%')[1]
-				tkMessageBox.showinfo("Prediction from Server ...","Gender Predicted by the Server is : %s",%mssg)
+				mssg='Gender Predicted by the Server is : '+mssg
+				tkMessageBox.showinfo("Prediction from Server ...",mssg)
 			elif '%%eofn%%' in mssg:
 				self.listenForFiles(mssg)
 
