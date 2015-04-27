@@ -10,6 +10,7 @@ import subprocess
 from numpy import array, ma
 import matplotlib.pyplot as plt
 from demo_waveform_plot import get_waveform_plot, set_xlabels_sample2time
+from formant import get_formants
 
 app = Flask(__name__)
 
@@ -101,7 +102,14 @@ def pitchpy():
 	avg=avg/(len(extracted_voice))
 	print "Average Pitch of Extracted Voice: "+ str(avg)
 
-	ageclassify(avg, VocalTractLength(extracted_voice[0]))
+        formantf = get_formants(filename)
+
+        for i in formantf:
+            if i != 0:
+                formantf = i
+                break
+
+	ageclassify(avg, VocalTractLength(formantf))
 	clf.classify([avg])
 	skip = 1
 

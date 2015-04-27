@@ -7,6 +7,7 @@ import numpy
 import subprocess
 import classifier
 from classifier import Classifier
+from formant import get_formants
 
 #folder where we store all the training data
 foldername = "samples"
@@ -36,6 +37,9 @@ def VocalTractLength(formant):
 
 # A list to store all the vocal tract lengths
 vtl = []
+
+# A list to store all formant frequencies.
+formant = []
 
 # Size with which to instantiate numpy array
 num_samples = len([name for name in os.listdir(foldername) if os.path.isfile(os.path.join(foldername,name))])
@@ -112,15 +116,21 @@ for fname in os.listdir(foldername):
     			#print "True"+str(j)+pitches[j]
     			extracted_voice+=[pitches[j]]
 
-    #print extracted_voice
+    formantfr = get_formants(filename)
 
-    vtl.append(VocalTractLength(extracted_voice[0]))
+    for i in formantfr:
+
+        if i != 0:
+# Add the first non-zero frequency to our list of formant frequencies.
+            formant.append(i)
+            break
+
+    vtl.append(VocalTractLength(formant[len(formant)-1]))
 
     avg=0.0
     for i in extracted_voice:
     	avg+=i
     avg=avg/(len(extracted_voice))
-#    print "Average Pitch of Extracted Voice: "+ str(avg)
 
     # Store the average pitch in our array
     trainingpitch[current] = [avg]
